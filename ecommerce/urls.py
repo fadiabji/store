@@ -23,4 +23,5 @@ urlpatterns = [
     path('', include('store.urls')),
 ]
 
+#this is after we set the url for images in settings.py then we import settings here
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 class Customer(models.Model):
 	user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+	# CASCADE delete the user whenever you delete the customer
 	name = models.CharField(max_length=200, null=True)
 	email = models.CharField(max_length=200)
 
@@ -16,11 +17,13 @@ class Product(models.Model):
 	name = models.CharField(max_length=200)
 	price = models.FloatField()
 	digital = models.BooleanField(default=False,null=True, blank=True)
+	# if the product is fisical so we shipe it, if digital no neet to shipe operation
 	image = models.ImageField(null=True, blank=True)
 
 	def __str__(self):
 		return self.name
 
+	# this function is for when we delete an image so the website doesn't crash
 	@property
 	def imageURL(self):
 		try:
@@ -31,8 +34,10 @@ class Product(models.Model):
 
 class Order(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+	# on_delete = models.SET_NULL we don't want to delete the customer when the order deleted.
 	date_ordered = models.DateTimeField(auto_now_add=True)
 	complete = models.BooleanField(default=False)
+	# if the order is too big so we set a limit.
 	transaction_id = models.CharField(max_length=100, null=True)
 
 	def __str__(self):
