@@ -36,8 +36,8 @@
                         <p class="quantity">{{item.quantity}}</p>
                         <div class="quantity">
                             <img data-product={{item.product.id}}  data-action='add' class="chg-quantity update-cart" src="{% static  'images/arrow-up.png' %}">
-                    
-                            <img data-product={{item.product.id}}  data-action='remove' class="chg-quantity update-cart" src="{% static  'images/arrow-down.png' %}">
+<!--                             item.product.id is suppose to be product.id only byt here we looping from items therefor we put item.product.id with "item" at the biginnign
+ -->                            <img data-product={{item.product.id}}  data-action='remove' class="chg-quantity update-cart" src="{% static  'images/arrow-down.png' %}">
                         </div>
                     </div>
                 <div style="flex:1"><p>${{item.get_total|floatformat:2}}</p></div>

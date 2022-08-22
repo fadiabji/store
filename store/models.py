@@ -45,7 +45,8 @@ class Order(models.Model):
 		
 	@property
 	def shipping(self):
-		shipping = False
+		"""this methoc created for get the all orderitems and check if any one is fisical so give me the shipping fileds if not kep them hidden behind the sine"""
+		shipping = False # at the biggning the shipping is not avalibale
 		orderitems = self.orderitem_set.all()
 		for i in orderitems:
 			if i.product.digital == False:
@@ -86,3 +87,6 @@ class ShippingAddress(models.Model):
 
 	def __str__(self):
 		return self.address
+
+
+

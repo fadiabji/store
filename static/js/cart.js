@@ -8,14 +8,37 @@ for (var i = 0; i < updateBtns.length; i++){
 
 		console.log('USER:', user)
 		if (user === 'AnonymousUser'){
-			console.log('user is not authenticated')
+			addCokkieItem(productId, action)
 		}else{
 			updateUserOrder(productId, action)
 		}
 	})
-
 }
 
+/*this function action when user is logged in
+*/
+function addCokkieItem(productId, action){
+	console.log("Not logged in..")
+
+	if(action == 'add'){
+		if (cart[productId] == undefined){
+			cart[productId] = {'quantitiy':1}
+		}else{
+			cart[productId]['quantitiy'] += 1
+		}
+	} 
+	if (action == 'remove'){
+		cart[productId]['quantity'] -= 1
+
+		if (cart[productId]['qiantity'] <= 0){
+			console.log("Remove Item")
+			delete cart[productId]
+		}
+	}
+	console.log('Cart:', cart)
+	document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+
+}
 /* fetch is the way to send data to backend by useing the Token and past it in headers 'X-CSRFToken */
 function updateUserOrder(productId, action){
 	var url = '/update_item/'
