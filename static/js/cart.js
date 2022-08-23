@@ -22,21 +22,22 @@ function addCokkieItem(productId, action){
 
 	if(action == 'add'){
 		if (cart[productId] == undefined){
-			cart[productId] = {'quantitiy':1}
+			cart[productId] = {'quantity':1}
 		}else{
-			cart[productId]['quantitiy'] += 1
+			cart[productId]['quantity'] += 1
 		}
 	} 
 	if (action == 'remove'){
 		cart[productId]['quantity'] -= 1
 
-		if (cart[productId]['qiantity'] <= 0){
+		if (cart[productId]['quantity'] <= 0){
 			console.log("Remove Item")
 			delete cart[productId]
 		}
 	}
 	console.log('Cart:', cart)
 	document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+	location.reload()
 
 }
 /* fetch is the way to send data to backend by useing the Token and past it in headers 'X-CSRFToken */
