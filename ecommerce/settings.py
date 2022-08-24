@@ -10,12 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+import dj_database_url
 import os
+from django.test.runner import DiscoverRunner
+from pathlib import Path
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+IS_HEROKU = "DYNO" in os.environ
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -23,10 +28,20 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'z+ksf@)0d^qojbh4rnp4b1to$hq&*tt(3bs$gf(3i267g$k9ln'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if 'SECRET_KEY' in os.environ:
+    SECRET_KEY = os.environ["SECRET_KEY"]
 
-ALLOWED_HOSTS = []
+
+# Generally avoid wildcards(*). However since Heroku router provides hostname validation it is ok
+if IS_HEROKU:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = []
+
+
+# SECURITY WARNING: don't run with debug turned on in production!
+if not IS_HEROKU:
+    DEBUG = True
 
 
 # Application definition
@@ -42,7 +57,14 @@ INSTALLED_APPS = [
     'store.apps.StoreConfig',
 ]
 
+
+
+
+# # Enable WhiteNoise's GZip compression of static assets.
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 MIDDLEWARE = [
+    # "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -83,24 +105,29 @@ DATABASES = {
     }
 }
 
+if "DATABASE_URL" in os.environ:
+    # Configure Django for DATABASE_URL environment variable.
+    DATABASES["default"] = dj_database_url.config(
+        conn_max_age=MAX_CONN_AGE, ssl_require=True)
+
+    # Enable test database if found in CI environment.
+    if "CI" in os.environ:
+        DATABASES["default"]["TEST"] = DATABASES["default"]
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
+
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
 
 
 # Internationalization
@@ -120,13 +147,35 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = '/static/'
 
+
+# Test Runner Config
+class HerokuDiscoverRunner(DiscoverRunner):
+    """Test Runner for Heroku CI, which provides a database for you.
+    This requires you to set the TEST database (done for you by settings().)"""
+
+    def setup_databases(self, **kwargs):
+        self.keepdb = True
+        return super(HerokuDiscoverRunner, self).setup_databases(**kwargs)
+
+
+# Use HerokuDiscoverRunner on Heroku CI
+if "CI" in os.environ:
+    TEST_RUNNER = "ecommerce.settings.HerokuDiscoverRunner"
+
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# this filed when admin upload images for products it comes to this folder and we use the Pillow to let python manage that
+
+MEDIA_URL = '/images/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
-
-# this filed when admin upload images for products it comes to this folder and we use the Pillow to let python manage that
-MEDIA_URL = '/images/'
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
