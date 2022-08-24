@@ -48,12 +48,9 @@ def updateItem(request):
 	elif action == 'remove':
 		orderItem.quantity = (orderItem.quantity - 1)
 	orderItem.save()
-
 	if orderItem.quantity <= 0:
 		orderItem.delete()
-
 	return JsonResponse("Item was added", safe=False)
-
 
 def processOrder(request):
 	transaction_id = datetime.datetime.now().timestamp()
@@ -83,7 +80,6 @@ def processOrder(request):
 			state = data['shipping']['state'],
 			zipcode = data['shipping']['zipcode'],
 			)
-
 
 	return JsonResponse('Payment subbmitted..',safe=False)
 

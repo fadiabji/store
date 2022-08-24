@@ -44,7 +44,9 @@
         <br>
         <div class="box-element hidden" id="payment-info">
             <small>Paypal Options</small>
-            <button id="make-payment">Make payment</button>
+            <!-- Set up a container element for the button -->
+            <div id="paypal-button-container"></div>
+            <!-- <button id="make-payment">Make payment</button> -->
         </div>
 
     </div>
@@ -69,6 +71,51 @@
         </div>
     </div>
 </div>
+
+<!-- Include the PayPal JavaScript SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=AX9sWmVT1dAWHVVoCPSSqP7CzCq__eXIIGDn3yXwzYycW34rtsBUyDF3UZXLXuuD5dv4I7sFgcTHjHo2&currency=USD"></script>
+
+<script>
+
+    var total = '{{order.get_cart_total}}'
+        // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
+
+            style:{
+                color : 'blue',
+                shape : 'rect'
+            },
+
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: parseFloat(total).toFixed(2)
+                        }
+                    }]
+                });
+            },
+
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(orderData) {
+                    // Successful capture! For demo purposes:
+                    alert('Transaction completed');
+                    submitFormData()
+
+                    // Replace the above to show a success message within this page, e.g.
+                    // const element = document.getElementById('paypal-button-container');
+                    // element.innerHTML = '';
+                    // element.innerHTML = '<h3>Thank you for your payment!</h3>';
+                    // Or go to another URL:  actions.redirect('thank_you.html');
+                });
+            }
+
+
+        }).render('#paypal-button-container');
+    </script>
+
 <script type="text/javascript">
     var shipping = '{{order.shipping}}'
     var total = '{{order.get_cart_total}}'
@@ -100,9 +147,9 @@
         document.getElementById('payment-info').classList.remove("hidden");
     })
 
-    document.getElementById('make-payment').addEventListener('click', function(e){
+    /*document.getElementById('make-payment').addEventListener('click', function(e){
         submitFormData()
-    })
+    })*/
     
     function submitFormData(){
         console.log("payment button clicked")
